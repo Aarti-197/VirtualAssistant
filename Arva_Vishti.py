@@ -1,4 +1,3 @@
-from math import fabs
 from posixpath import pathsep
 import pyttsx3
 import speech_recognition as sr
@@ -28,10 +27,10 @@ from pytube import YouTube #pip install pytube3  #if any error python -m pip ins
 import pywikihow #pip install pywikihow
 from pywikihow import search_wikihow
 from pywikihow import WikiHow
-from twilio.rest import Client #pip install twilio
 import math
 import string
 from ctypes import windll
+import tkinter
 
 #for GUI
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -43,44 +42,31 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUiType
 from VirtualAssistantGUI import Ui_ARVA_VISHTI
 
-
-
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 #print(voices[1].id)heel
 engine.setProperty('voice',voices[1].id)
 engine.setProperty('rate',175)
 
-class InputText(QWidget):
+class ButtonEntry():
+    def __init__(self, root):
+        self.entry_var=""
 
-    def __init__(self):
-        super().__init__()
-        self.title = 'PyQt5 button'
-        self.left = 10
-        self.top = 10
-        self.width = 320
-        self.height = 200
-        self.initUI()
-    
-    def initUI(self):
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
-        self.inputBox = QLineEdit(self)
-        self.inputBox.move(20,80)
-        self.inputBox.resize(200,40)
-        self.button = QPushButton('Show Text', self)
-        self.button.move(20,120)
-        self.button.clicked.connect(self.on_click)        
-        self.show()
+        startLabel =tkinter.Label(root,text="Enter here: ")
+        self.startEntry=tkinter.Entry(root)
 
-    @pyqtSlot()
-    def on_click(self):
-        # print('PyQt5 button click')
-        textBoxValue = self.inputBox.text()
-        return textBoxValue
-        # QMessageBox.question(self,"Message","You Typed: "+textBoxValue,QMessageBox.Ok,QMessageBox.Ok)
+        startLabel.pack()
+        self.startEntry.pack()
+        self.startEntry.focus_set()
 
-        # self.inputBox.setText("")
+        plotButton= tkinter.Button(root,text="Press to save ",command=self.msgSend).pack()
+
+    def msgSend(self):
+        self.entry_var=self.startEntry.get()
+        #print("inside class", self.entry_var)
+        global resultForMsg
+        resultForMsg = self.entry_var
+        return resultForMsg
 
 def try_finding_chrome_path():
     result = None
@@ -298,8 +284,6 @@ def alarm(timeforalarm):
                 break
 
 def startGame():
-
-
     boardWidth = 30
     boardHeight = 30
     tilesize = 10
@@ -474,77 +458,94 @@ class MainThread(QThread):
                 self.query = self.take_command().lower()
 
                 if "open notepad" in self.query:
-                    notepad = 'notepad'
-                    os.system(notepad)
+                    try:
+                        notepad = 'notepad'
+                        os.system(notepad)
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "open command prompt" in self.query:
-                    os.system("start cmd")
-
-                elif "play music" in self.query:
-                    music_dir = "D:\\songs"
-                    songs = os.listdir(music_dir)
-                    #rd = random.choice(songs)
-                    for song in songs:
-                        if song.endswith('.mp3'):
-                            os.startfile(os.path.join(music_dir,song))
+                    try:
+                        os.system("start cmd")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "ip address" in self.query:
-                    ip = get('https://api.ipify.org').text
-                    speak(f"Your IP address is {ip}")
+                    try:
+                        ip = get('https://api.ipify.org').text
+                        speak(f"Your IP address is {ip}")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "wikipedia" in self.query:
-                    speak("Searching Wikipedia...")
-                    self.query = self.query.replace("wikipedia","")
-                    results = wikipedia.summary(self.query,sentences=5)
-                    speak("According to wikipedia,")
-                    speak(results)
-                    #print(results)
+                    try:
+                        speak("Searching Wikipedia...")
+                        self.query = self.query.replace("wikipedia","")
+                        results = wikipedia.summary(self.query,sentences=5)
+                        speak("According to wikipedia,")
+                        speak(results)
+                        #print(results)
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "open youtube" in self.query:
-                    #webbrowser.open("www.youtube.com")
-                    speak("what shall I play on youtube?")
-                    song = self.take_command()
-                    speak(f'playing {song} for you')
-                    pywhatkit.playonyt(song)
-                    sys.exit()
+                    try:
+                        #webbrowser.open("www.youtube.com")
+                        speak("what shall I play on youtube?")
+                        song = self.take_command()
+                        speak(f'playing {song} for you')
+                        pywhatkit.playonyt(song)
+                        sys.exit()
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "open facebook" in self.query:
-                    path = try_finding_chrome_path()
-                    path = path.replace(os.sep,'/')
-                    path = f'{path} %s'
-                    webbrowser.get(path).open("www.facebook.com")
+                    try:
+                        path = try_finding_chrome_path()
+                        path = path.replace(os.sep,'/')
+                        path = f'{path} %s'
+                        webbrowser.get(path).open("www.facebook.com")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "open google" in self.query:
-                    speak("What should I search on google for you?")
-                    cm = self.take_command().lower()
-                    path = try_finding_chrome_path()
-                    path = path.replace(os.sep,'/')
-                    path = f'{path} %s'
-                    webbrowser.get(path).open(f"https://www.google.com/search?q={cm}")
+                    try:
+                        speak("What should I search on google for you?")
+                        cm = self.take_command().lower()
+                        path = try_finding_chrome_path()
+                        path = path.replace(os.sep,'/')
+                        path = f'{path} %s'
+                        webbrowser.get(path).open(f"https://www.google.com/search?q={cm}")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "send message" in self.query:
-                    speak("Tell me the number of the receiver")
-                    cnt_code = "+91"
-                    num = cnt_code + self.take_command()
-                    speak(f"Please confirm the number: {num}")
-                    userResponse = self.take_command().lower()
-                    if "yes" in userResponse or "yeah" in userResponse or "ya" in userResponse:
-                        speak("what message has to be sent?")
-                        msg = input("Enter message here...")
-                        #msg = InputText()
-                        #msg = self.lineditname.text()
-                        now = dt.datetime.now()
-                        h = now.hour
-                        m = now.minute + 2
-                        pywhatkit.sendwhatmsg(num,msg,h,m)
-                        #pyautogui.press("enter")
-                        # pyautogui.click(1050, 950)
-                        # time.sleep(2)
-                        #k.press_and_release('enter')
-                        speak("Message sent successfully.")
-
-                    else:
-                        speak("Okay! I'll not send the message")
+                    try:
+                        speak("Tell me the number of the receiver")
+                        cnt_code = "+91"
+                        num = cnt_code + self.take_command()
+                        speak(f"Please confirm the number: {num}")
+                        userResponse = self.take_command().lower()
+                        if "yes" in userResponse or "yeah" in userResponse or "ya" in userResponse:
+                            speak("what message has to be sent?")
+                            root=tkinter.Tk()
+                            root.geometry("400x240")
+                            BE=ButtonEntry(root)    
+                            root.mainloop()
+                            msg = resultForMsg
+                            now = dt.datetime.now()
+                            h = now.hour
+                            m = now.minute + 2
+                            pywhatkit.sendwhatmsg(num,msg,h,m,20)
+                            #pyautogui.press("enter")
+                            # pyautogui.click(1050, 950)
+                            # time.sleep(2)
+                            #k.press_and_release('enter')
+                            speak("Message sent successfully.")
+                        else:
+                            speak("Okay! I'll not send the message")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "send email" in self.query:
                     try:
@@ -554,20 +555,36 @@ class MainThread(QThread):
                         response = self.take_command().lower()
                         if "yes" in response:
                             speak("Provide me with the receiver's email address:")
-                            to = input("Enter the receiver's email address:")
+                            root=tkinter.Tk()
+                            root.geometry("400x240")
+                            BE=ButtonEntry(root)    
+                            root.mainloop()
+                            to = resultForMsg
                             speak(f"What do you want to send to {to} ?")
                             content = self.take_command().lower()
                             sendEmail(def_email,def_pwd,to,content)
                         elif "no" in response:
                             speak("Can you please guide me to login your email...")
-                            speak("Provide me with the sender's email address:")
-                            sender_id = input("Enter the sender's email address:")
-                            speak("Provide me with the sender's password for login:")
-                            sender_pwd = input("Enter the sender's password:")
+                            speak("Provide me with the your email address:")
+                            root=tkinter.Tk()
+                            root.geometry("400x240")
+                            BE=ButtonEntry(root)
+                            root.mainloop()
+                            sender_id = resultForMsg
+                            speak("Provide me with the your password for login:")
+                            root=tkinter.Tk()
+                            root.geometry("400x240")
+                            BE=ButtonEntry(root)    
+                            root.mainloop()
+                            sender_pwd = resultForMsg
                             speak(f"What do you want to send to {to} ?")
                             content = self.take_command().lower()
                             speak("Provide me with the receiver's email address:")
-                            to = input("Enter the receiver's email address:")
+                            root=tkinter.Tk()
+                            root.geometry("400x240")
+                            BE=ButtonEntry(root)    
+                            root.mainloop()
+                            to = resultForMsg
                             speak(f"What do you want to send to {to} ?")
                             content = self.take_command().lower()
                             sendEmail(sender_id,sender_pwd,to,content)
@@ -578,159 +595,209 @@ class MainThread(QThread):
                         print(e)
 
                 elif "open camera" in self.query:
-                    cam = cv2.VideoCapture(0)
-                    cv2.namedWindow("camera")
-                    img_counter = 0
-                    while True:
-                        ret, frame = cam.read()
-                        if not ret:
-                            print("failed to grab frame")
-                            break
-                        cv2.imshow("camera", frame)
+                    try:
+                        cam = cv2.VideoCapture(0)
+                        cv2.namedWindow("camera")
+                        img_counter = 0
+                        while True:
+                            ret, frame = cam.read()
+                            if not ret:
+                                print("failed to grab frame")
+                                break
+                            cv2.imshow("camera", frame)
 
-                        k = cv2.waitKey(1)
-                        if k%256 == 27:
-                            # ESC pressed
-                            print("Escape hit, closing...")
-                            #cam.destroyAllWindows()
-                            break
-                        elif k%256 == 32:
-                            # SPACE pressed
-                            img_name = "opencv_frame_{}.png".format(img_counter)
-                            cv2.imwrite(img_name, frame)
-                            print("{} written!".format(img_name))
-                            img_counter += 1
-                    cam.release()
-                    # cam.destroyAllWindows()
+                            k = cv2.waitKey(1)
+                            if k%256 == 27:
+                                # ESC pressed
+                                print("Escape hit, closing...")
+                                #cam.destroyAllWindows()
+                                break
+                            elif k%256 == 32:
+                                # SPACE pressed
+                                img_name = "opencv_frame_{}.png".format(img_counter)
+                                cv2.imwrite(img_name, frame)
+                                print("{} written!".format(img_name))
+                                img_counter += 1
+                        cam.release()
+                        # cam.destroyAllWindows()
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "temperature" in self.query:
-                    speak("which place' temperature would you like to know?")
-                    place = self.take_command().lower()
-                    search = "Temperature in " + place
-                    url = f'https://www.google.com/search?q={search}'
-                    r = requests.get(url)
-                    data = BeautifulSoup(r.text,"html.parser")
-                    temp = data.find("div",class_="BNeawe").text
-                    speak(f"Current {search} is {temp}")
+                    try:
+                        speak("which place' temperature would you like to know?")
+                        place = self.take_command().lower()
+                        search = "Temperature in " + place
+                        url = f'https://www.google.com/search?q={search}'
+                        r = requests.get(url)
+                        data = BeautifulSoup(r.text,"html.parser")
+                        temp = data.find("div",class_="BNeawe").text
+                        speak(f"Current {search} is {temp}")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "activate search mode" in self.query:
-                    speak("Plase tell me what do you want to search")
-                    how = self.take_command()
-                    max_results=1
-                    how_to = search_wikihow(how,max_results)
-                    assert len(how_to) == 1
-                    how_to[0].print()
-                    speak(how_to[0].summary)
+                    try:
+                        speak("Plase tell me what do you want to search")
+                        how = self.take_command()
+                        max_results=1
+                        how_to = search_wikihow(how,max_results)
+                        assert len(how_to) == 1
+                        how_to[0].print()
+                        speak(how_to[0].summary)
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "alarm" in self.query:
-                    speak('Please tell me the time to set the alarm. Example: 10:10 am')
-                    userResponse = self.take_command()
-                    userResponse = userResponse.replace('set alarm to ','')
-                    userResponse = userResponse.replace('.','')
-                    userResponse = userResponse.upper()
-                    alarm(userResponse)
+                    try:
+                        speak('Please tell me the time to set the alarm. Example: 10:10 am')
+                        userResponse = self.take_command()
+                        userResponse = userResponse.replace('set alarm to ','')
+                        userResponse = userResponse.replace('.','')
+                        userResponse = userResponse.upper()
+                        alarm(userResponse)
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "game" in self.query:
-                    speak('Okay.. I have the best game for you! The snake game! Would you like me to give you instructions?')
-                    userResponse = self.take_command().lower()
-                    if userResponse == 'yes':
-                        speak('Alright! You need to use w key to go up , a key to go left, d key to go right and s key to come down. Eat the apples you grow, if not you die! All the best')
-                        startGame()
-                        sys.exit()
-                    else :
-                        speak("Sorry couldn't understand you!")
+                    try:
+                        speak('Okay.. I have the best game for you! The snake game! Would you like me to give you instructions?')
+                        userResponse = self.take_command().lower()
+                        if userResponse == 'yes':
+                            speak('Alright! You need to use w key to go up , a key to go left, d key to go right and s key to come down. Eat the apples you grow, if not you die! All the best')
+                            startGame()
+                            sys.exit()
+                        else :
+                            speak("Sorry couldn't understand you!")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
         
                 elif "do some calculations" in self.query or "can you calculate" in self.query or "do some calculation" in self.query or "calculator" in self.query:
-                    r = sr.Recognizer()
-                    with sr.Microphone() as source:
-                        speak("What do you want to calculate?")
-                        r.adjust_for_ambient_noise(source)
-                        audio = r.listen(source)
-                        my_string = r.recognize_google(audio)
-                        print(my_string)
-                        if "cos" in my_string:
-                            #cos 10
-                            num = 0
-                            number = f'{num}'
-                            print(number)
-                            ans = cos(number)
-                            speak(ans)
-                        else:
-                            def getOperator(opr):
-                                return{
-                                    "+": add,
-                                    "-": sub,
-                                    "x": mul,
-                                    "divided": divide,
-                                    "/": divide,
-                                    "power": power
-                                }[opr]
-                            def EvaluateExpression(op1,opr,op2):
-                                op1,op2 = int(op1), int(op2)
-                                return getOperator(opr)(op1,op2)
-                            speak("The answer is: ")
-                            speak(EvaluateExpression(*(my_string.split())))
+                    try:
+                        r = sr.Recognizer()
+                        with sr.Microphone() as source:
+                            speak("What do you want to calculate?")
+                            r.adjust_for_ambient_noise(source)
+                            audio = r.listen(source)
+                            my_string = r.recognize_google(audio)
+                            print(my_string)
+                            if "cos" in my_string:
+                                #cos 10
+                                num = 0
+                                number = f'{num}'
+                                print(number)
+                                ans = cos(number)
+                                speak(ans)
+                            else:
+                                def getOperator(opr):
+                                    return{
+                                        "+": add,
+                                        "-": sub,
+                                        "x": mul,
+                                        "divided": divide,
+                                        "/": divide,
+                                        "power": power
+                                    }[opr]
+                                def EvaluateExpression(op1,opr,op2):
+                                    op1,op2 = int(op1), int(op2)
+                                    return getOperator(opr)(op1,op2)
+                                speak("The answer is: ")
+                                speak(EvaluateExpression(*(my_string.split())))
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "battery" in self.query or "how much power left" in self.query:
-                    battery = checkBattery()
-                    speak(f"Our system has {battery} percent battery")
+                    try:
+                        battery = checkBattery()
+                        speak(f"Our system has {battery} percent battery")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "check internet speed" in self.query or "speed test" in self.query or "internet speed" in self.query:
-                    st = speedtest.Speedtest()
-                    dl = round(st.download() / 1048576)
-                    up = round(st.upload() / 1048576)
-                    speak(f"The download speed is {dl} mbp s and upload speed is {up} mbp s")
+                    try:
+                        st = speedtest.Speedtest()
+                        dl = round(st.download() / 1048576)
+                        up = round(st.upload() / 1048576)
+                        speak(f"The download speed is {dl} mbp s and upload speed is {up} mbp s")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "increase volume" in self.query or "volume up" in self.query or "volume high" in self.query:
-                    pyautogui.press("volumeup")
+                    try:
+                        pyautogui.press("volumeup")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "decrease volume" in self.query or "volume down" in self.query or "volume low" in self.query:
-                    pyautogui.press("volumedown")
+                    try:
+                        pyautogui.press("volumedown")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "volume off" in self.query or "mute" in self.query:
-                    pyautogui.press("volumemute")
+                    try:
+                        pyautogui.press("volumemute")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "translate" in self.query:
-                    translateSentence()
-                    res = "yes"
-                    while res == "yes":
-                        speak("Do you want to translate something else?")
-                        res = self.take_command().lower()
-                        if "yes" in res:
-                            translateSentence()
-                        else:
-                            res = "no"
-                            break
+                    try:
+                        translateSentence()
+                        res = "yes"
+                        while res == "yes":
+                            speak("Do you want to translate something else?")
+                            res = self.take_command().lower()
+                            if "yes" in res:
+                                translateSentence()
+                            else:
+                                res = "no"
+                                break
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "download video" in self.query:
-                    speak("Provide me the youtube link...")
-                    url = input("Enter link here:")
-                    speak("Downloading, please wait, this might take a few minutes")
-                    YouTube(url).streams.get_highest_resolution().download()
-                    speak("Download completed.")
+                    try:
+                        speak("Provide me the youtube link...")
+                        root=tkinter.Tk()
+                        root.geometry("400x240")
+                        BE=ButtonEntry(root)    
+                        root.mainloop()
+                        url = resultForMsg
+                        speak("Downloading, please wait, this might take a few minutes")
+                        YouTube(url).streams.get_highest_resolution().download()
+                        speak("Download completed.")
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 elif "search a file" in self.query or "open a file" in self.query:
-                    isFound = False
-                    search = input("Enter file name: ")
-                    drives = []
-                    bitmask = windll.kernel32.GetLogicalDrives()
-                    for letter in string.ascii_uppercase:
-                        if bitmask & 1:
-                            drives.append(letter)
-                            print(letter)
-                            if letter!="c" and letter!="C":
-                                listing1 = os.walk(letter+":/")
-                                if isFound == False:
-                                    print("Searching in "+letter+" drive")
-                                    for root, dir, files in listing1:
-                                        if search in files:
-                                            print(os.path.join(root,search))
-                                            os.startfile(os.path.join(root,search))
-                                            isFound = True
-                                            break
+                    try:
+                        isFound = False
+                        root=tkinter.Tk()
+                        root.geometry("400x240")
+                        BE=ButtonEntry(root)    
+                        root.mainloop()
+                        search = resultForMsg
+                        drives = []
+                        bitmask = windll.kernel32.GetLogicalDrives()
+                        for letter in string.ascii_uppercase:
+                            if bitmask & 1:
+                                drives.append(letter)
+                                print(letter)
+                                if letter!="c" and letter!="C":
+                                    listing1 = os.walk(letter+":/")
                                     if isFound == False:
-                                        print(search + " not found in "+letter+" drive")
-                        bitmask >>= 1
+                                        print("Searching in "+letter+" drive")
+                                        for root, dir, files in listing1:
+                                            if search in files:
+                                                print(os.path.join(root,search))
+                                                os.startfile(os.path.join(root,search))
+                                                isFound = True
+                                                break
+                                        if isFound == False:
+                                            print(search + " not found in "+letter+" drive")
+                            bitmask >>= 1
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 # elif "talk to are vah" in self.query or "talk to misty" in self.query or "change gender" in self.query or "bored talking to you" in self.query:
                 #     #print(gen)
@@ -746,8 +813,11 @@ class MainThread(QThread):
                 #         gen=0
 
                 elif "no" in self.query:
-                    speak("Thank you for using me, have a great day ahead...")                
-                    sys.exit()
+                    try:
+                        speak("Thank you for using me, have a great day ahead...")                
+                        sys.exit()
+                    except Exception as e:
+                        speak("OOPS! Something went wrong")
 
                 speak("Do you have any other work?")
 
